@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Hey Prdor </h1>
+    <h1>Hey </h1>
+    {% for task in tasks %}
+        <p>{{ task.title }}</p>
+        <p>{{ task.description }}</p>
+    {% endfor %}
 {% endblock content %}
