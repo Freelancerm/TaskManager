@@ -1,9 +1,12 @@
+import json
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import F
 
 from .models import Project, Task
 from .forms import ProjectForm, TaskForm
@@ -12,7 +15,10 @@ from .forms import ProjectForm, TaskForm
 class HomeView(LoginRequiredMixin, View):
     def get(self, request):
         projects = Project.objects.filter(user=request.user)
-        tasks = Task.objects.filter(user=request.user, project__isnull=True)
+        tasks = (
+            Task.objects.filter(user=request.user, project__isnull=True)
+            .order_by("is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at")
+        )
         return render(request, "home.html", {"projects": projects, "tasks": tasks})
 
 
@@ -21,7 +27,21 @@ class TaskToggleDoneView(LoginRequiredMixin, View):
         task = get_object_or_404(Task, pk=pk, user=request.user)
         task.is_done = not task.is_done
         task.save(update_fields=["is_done"])
-        return render(request, "partials/task_item.html", {"task": task})
+        response = render(request, "partials/task_item.html", {"task": task})
+        trigger = (
+            f"project-tasks-{task.project_id}" if task.project_id else "task-list-updated"
+        )
+        response.headers["HX-Trigger"] = trigger
+        return response
+
+
+class TaskListView(LoginRequiredMixin, View):
+    def get(self, request):
+        tasks = (
+            Task.objects.filter(user=request.user, project__isnull=True)
+            .order_by("is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at")
+        )
+        return render(request, "partials/task_list.html", {"tasks": tasks})
 
 
 class TaskCreateView(LoginRequiredMixin, CreateView):
@@ -46,9 +66,26 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
         task.user = self.request.user
         task.save()
         if self.request.htmx:
-            if task.project_id is None:
-                return render(self.request, "partials/task_item.html", {"task": task})
-            return HttpResponse("")
+            trigger = (
+                f"project-tasks-{task.project_id}"
+                if task.project_id
+                else "task-list-updated"
+            )
+            if task.project_id:
+                blank_form = TaskForm(user=self.request.user)
+                context = {
+                    "form": blank_form,
+                    "form_action": reverse("task-create"),
+                    "form_title": "New task",
+                    "submit_label": "Create",
+                }
+                response = render(self.request, self.template_name, context)
+                response.headers["HX-Retarget"] = "#task-form-container"
+                response.headers["HX-Reswap"] = "innerHTML"
+            else:
+                response = render(self.request, "partials/task_item.html", {"task": task})
+            response.headers["HX-Trigger"] = trigger
+            return response
         return redirect("home")
 
     def form_invalid(self, form):
@@ -83,9 +120,24 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
+        old_project_id = self.object.project_id
         task = form.save()
         if self.request.htmx:
-            return render(self.request, "partials/task_item.html", {"task": task})
+            response = render(self.request, "partials/task_item.html", {"task": task})
+            triggers = []
+            if old_project_id:
+                triggers.append(f"project-tasks-{old_project_id}")
+            else:
+                triggers.append("task-list-updated")
+            if task.project_id and task.project_id != old_project_id:
+                triggers.append(f"project-tasks-{task.project_id}")
+            if task.project_id is None and task.project_id != old_project_id:
+                triggers.append("task-list-updated")
+            if len(triggers) == 1:
+                response.headers["HX-Trigger"] = triggers[0]
+            elif triggers:
+                response.headers["HX-Trigger"] = json.dumps({name: "" for name in triggers})
+            return response
         return redirect("home")
 
     def form_invalid(self, form):
@@ -109,12 +161,17 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
+        project_id = self.object.project_id
         self.object.delete()
         is_htmx = bool(getattr(request, "htmx", False)) or request.headers.get(
             "HX-Request"
         ) == "true"
         if is_htmx:
-            return HttpResponse("")
+            response = HttpResponse("")
+            response.headers["HX-Trigger"] = (
+                f"project-tasks-{project_id}" if project_id else "task-list-updated"
+            )
+            return response
         return redirect(self.get_success_url())
 
     def post(self, request, *args, **kwargs):
@@ -209,7 +266,10 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
 class ProjectTasksView(LoginRequiredMixin, View):
     def get(self, request, pk):
         project = get_object_or_404(Project, pk=pk, user=request.user)
-        tasks = Task.objects.filter(user=request.user, project=project)
+        tasks = (
+            Task.objects.filter(user=request.user, project=project)
+            .order_by("is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at")
+        )
         return render(
             request,
             "partials/project_tasks.html",

@@ -15,6 +15,7 @@
         {% if task.description %}
         <div class="task-meta">{{ task.description }}</div>
         {% endif %}
+        <div class="task-meta">Priority: {{ task.get_priority_display }}</div>
         {% if task.due_date %}
         <div class="task-meta">Due Date: {{ task.due_date }}</div>
         {% endif %}

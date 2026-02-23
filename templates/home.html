@@ -10,10 +10,13 @@
             hx-get="{% url 'task-create' %}"
             hx-trigger="load, project-list-changed from:body"
         ></div>
-        <div id="task-list">
-            {% for task in tasks %}
-            {% include "partials/task_item.html" with task=task %}
-            {% endfor %}
+        <div
+            id="task-list"
+            hx-get="{% url 'task-list' %}"
+            hx-trigger="load, task-list-updated from:body"
+            hx-swap="innerHTML"
+        >
+            {% include "partials/task_list.html" with tasks=tasks %}
         </div>
     </div>
 

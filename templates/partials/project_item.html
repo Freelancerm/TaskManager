@@ -28,4 +28,10 @@
         </button>
     </div>
 </div>
-<div class="ms-4 mb-2" id="project-{{ project.id }}-tasks"></div>
+<div
+    class="ms-4 mb-2"
+    id="project-{{ project.id }}-tasks"
+    hx-get="{% url 'project-tasks' project.id %}"
+    hx-trigger="project-tasks-{{ project.id }} from:body"
+    hx-swap="innerHTML"
+></div>
