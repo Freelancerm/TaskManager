@@ -1,0 +1,30 @@
+<li class="list-group-item" id="task-{{ task.id }}">
+    <div class="d-flex align-items-start gap-2">
+        <input
+            class="form-check-input mt-1"
+            type="checkbox"
+            {% if task.is_done %}checked{% endif %}
+            hx-post="{% url 'task-toggle' task.id %}"
+            hx-target="closest li"
+            hx-swap="outerHTML"
+            hx-trigger="change"
+        >
+        <div class="flex-grow-1">
+            <div class="card mb-2">
+                <div class="card-body py-2">
+                    <h5 class="card-title mb-1 {% if task.is_done %}text-decoration-line-through text-muted{% endif %}">
+                        {{ task.title }}
+                    </h5>
+                    {% if task.description %}
+                    <p class="card-text mb-1">{{ task.description }}</p>
+                    {% endif %}
+                    {% if task.due_date %}
+                    <p class="card-text mb-0">
+                        <small class="text-muted">Due Date: {{ task.due_date }}</small>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</li>
