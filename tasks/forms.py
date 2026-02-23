@@ -5,7 +5,7 @@ from .models import Task, Project
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ["title", "description", "due_date", "project"]
+        fields = ["title", "description", "priority", "due_date", "project"]
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
