@@ -10,7 +10,7 @@
         class="card-body py-2"
         id="task-form-container"
         hx-get="{% url 'task-create' %}"
-        hx-trigger="load"
+        hx-trigger="load, project-list-changed from:body"
     ></div>
 
     <ul class="list-group list-group-flush" id="task-list">

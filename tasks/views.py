@@ -80,9 +80,7 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         task = form.save()
         if self.request.htmx:
-            if task.project_id is None:
-                return render(self.request, "partials/task_item.html", {"task": task})
-            return HttpResponse("")
+            return render(self.request, "partials/task_item.html", {"task": task})
         return redirect("home")
 
     def form_invalid(self, form):
@@ -130,7 +128,11 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
         project.user = self.request.user
         project.save()
         if self.request.htmx:
-            return render(self.request, "partials/project_item.html", {"project": project})
+            response = render(
+                self.request, "partials/project_item.html", {"project": project}
+            )
+            response.headers["HX-Trigger"] = "project-list-changed"
+            return response
         return redirect("home")
 
     def form_invalid(self, form):
@@ -157,7 +159,11 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         project = form.save()
         if self.request.htmx:
-            return render(self.request, "partials/project_item.html", {"project": project})
+            response = render(
+                self.request, "partials/project_item.html", {"project": project}
+            )
+            response.headers["HX-Trigger"] = "project-list-changed"
+            return response
         return redirect("home")
 
     def form_invalid(self, form):
@@ -181,8 +187,21 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
             "HX-Request"
         ) == "true"
         if is_htmx:
-            return HttpResponse("")
+            response = HttpResponse("")
+            response.headers["HX-Trigger"] = "project-list-changed"
+            return response
         return redirect(self.get_success_url())
 
     def post(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
+
+
+class ProjectTasksView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        project = get_object_or_404(Project, pk=pk, user=request.user)
+        tasks = Task.objects.filter(user=request.user, project=project)
+        return render(
+            request,
+            "partials/project_tasks.html",
+            {"project": project, "tasks": tasks},
+        )

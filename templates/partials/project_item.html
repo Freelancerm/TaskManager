@@ -3,6 +3,14 @@
         <strong>{{ project.name }}</strong>
         <div class="d-flex gap-2">
             <button
+                class="btn btn-outline-primary btn-sm"
+                hx-get="{% url 'project-tasks' project.id %}"
+                hx-target="#project-{{ project.id }}-tasks"
+                hx-swap="innerHTML"
+            >
+                Tasks
+            </button>
+            <button
                 class="btn btn-outline-secondary btn-sm"
                 hx-get="{% url 'project-update' project.id %}"
                 hx-target="#project-form-container"
@@ -21,4 +29,5 @@
             </button>
         </div>
     </div>
+    <div class="mt-2" id="project-{{ project.id }}-tasks"></div>
 </li>
