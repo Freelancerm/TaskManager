@@ -9,7 +9,7 @@ from .models import Project, Task
 from .forms import ProjectForm, TaskForm
 
 
-class HomeView(View):
+class HomeView(LoginRequiredMixin, View):
     def get(self, request):
         projects = Project.objects.filter(user=request.user)
         tasks = Task.objects.filter(user=request.user, project__isnull=True)

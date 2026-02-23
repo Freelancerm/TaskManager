@@ -19,10 +19,13 @@
         <div class="ms-auto d-flex align-items-center gap-3">
             {% if user.is_authenticated %}
             <span class="text-muted small">{{ user.username }}</span>
-            <a class="btn btn-outline-dark btn-sm" href="#">Logout</a>
+            <form method="post" action="{% url 'account_logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-dark btn-sm" type="submit">Logout</button>
+            </form>
             {% else %}
-            <a class="btn btn-outline-dark btn-sm" href="#">Login</a>
-            <a class="btn btn-dark btn-sm" href="#">Sign up</a>
+            <a class="btn btn-outline-dark btn-sm" href="{% url 'account_login' %}">Login</a>
+            <a class="btn btn-dark btn-sm" href="{% url 'account_signup' %}">Sign up</a>
             {% endif %}
         </div>
     </div>
