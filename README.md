@@ -87,3 +87,15 @@ Run the test suite:
 ```bash
 python manage.py test
 ```
+
+## pre-commit
+Install hooks locally to run linting/formatting on every commit:
+```bash
+pip install -r requirements.txt
+pre-commit install
+```
+
+Manual run:
+```bash
+pre-commit run --all-files
+```
