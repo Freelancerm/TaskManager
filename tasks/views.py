@@ -126,16 +126,16 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
         old_project_id = self.object.project_id
         task = form.save()
         if self.request.htmx:
-            response = render(self.request, "partials/task_item.html", {"task": task})
             triggers = []
             if old_project_id:
                 triggers.append(f"project-tasks-{old_project_id}")
             else:
                 triggers.append("task-list-updated")
-            if task.project_id and task.project_id != old_project_id:
+            if task.project_id:
                 triggers.append(f"project-tasks-{task.project_id}")
-            if task.project_id is None and task.project_id != old_project_id:
+            else:
                 triggers.append("task-list-updated")
+            response = HttpResponse("")
             if len(triggers) == 1:
                 response.headers["HX-Trigger"] = triggers[0]
             elif triggers:
