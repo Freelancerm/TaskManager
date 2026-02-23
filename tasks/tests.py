@@ -1,10 +1,12 @@
 from datetime import date
 
+from django.utils import timezone
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
 from .models import Project, Task
+from .forms import TaskForm
 
 
 class TaskManagerAccessTests(TestCase):
@@ -129,3 +131,83 @@ class TaskManagerHTMXTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Task.objects.filter(id=task.id).exists())
+
+
+class TaskManagerValidationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="u1", password="pass")
+        self.project = Project.objects.create(user=self.user, name="P1")
+
+    def test_due_date_cannot_be_past(self):
+        form = TaskForm(
+            data={
+                "title": "T1",
+                "description": "",
+                "priority": Task.PRIORITY_MEDIUM,
+                "due_date": (timezone.localdate() - timezone.timedelta(days=1)).isoformat(),
+                "project": self.project.id,
+            },
+            user=self.user,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("due_date", form.errors)
+
+    def test_title_unique_within_project(self):
+        Task.objects.create(user=self.user, project=self.project, title="Unique")
+        form = TaskForm(
+            data={
+                "title": "Unique",
+                "description": "",
+                "priority": Task.PRIORITY_MEDIUM,
+                "due_date": "",
+                "project": self.project.id,
+            },
+            user=self.user,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("title", form.errors)
+
+    def test_title_can_repeat_in_other_project(self):
+        other_project = Project.objects.create(user=self.user, name="P2")
+        Task.objects.create(user=self.user, project=self.project, title="Repeat")
+        form = TaskForm(
+            data={
+                "title": "Repeat",
+                "description": "",
+                "priority": Task.PRIORITY_MEDIUM,
+                "due_date": "",
+                "project": other_project.id,
+            },
+            user=self.user,
+        )
+        self.assertTrue(form.is_valid())
+
+
+class TaskManagerOrderingTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="u1", password="pass")
+
+    def test_ordering_prioritizes_high_and_nearest_due(self):
+        today = timezone.localdate()
+        task_low = Task.objects.create(
+            user=self.user,
+            title="Low",
+            priority=Task.PRIORITY_LOW,
+            due_date=today,
+        )
+        task_high_late = Task.objects.create(
+            user=self.user,
+            title="High late",
+            priority=Task.PRIORITY_HIGH,
+            due_date=today + timezone.timedelta(days=5),
+        )
+        task_high_soon = Task.objects.create(
+            user=self.user,
+            title="High soon",
+            priority=Task.PRIORITY_HIGH,
+            due_date=today + timezone.timedelta(days=1),
+        )
+        ordered = list(Task.objects.filter(user=self.user).order_by(*Task._meta.ordering))
+        self.assertEqual(ordered[0].id, task_high_soon.id)
+        self.assertEqual(ordered[1].id, task_high_late.id)
+        self.assertEqual(ordered[2].id, task_low.id)
