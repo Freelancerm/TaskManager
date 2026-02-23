@@ -5,6 +5,8 @@ from .models import Task, Project
 
 
 class TaskForm(forms.ModelForm):
+    """Task form with per-user project filtering and validation rules."""
+
     class Meta:
         model = Task
         fields = ["title", "description", "priority", "due_date", "project"]
@@ -19,7 +21,9 @@ class TaskForm(forms.ModelForm):
                 attrs={"class": "form-control", "rows": 3, "placeholder": "Description"}
             ),
             "priority": forms.Select(attrs={"class": "form-select"}),
-            "due_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "due_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
             "project": forms.Select(attrs={"class": "form-select"}),
         }
 
@@ -33,12 +37,14 @@ class TaskForm(forms.ModelForm):
         self.fields["due_date"].widget.attrs["min"] = timezone.localdate().isoformat()
 
     def clean_due_date(self):
+        """Disallow due dates in the past."""
         due_date = self.cleaned_data.get("due_date")
         if due_date and due_date < timezone.localdate():
             raise forms.ValidationError("Due date cannot be in the past.")
         return due_date
 
     def clean(self):
+        """Ensure task title is unique within the same project for a user."""
         cleaned_data = super().clean()
         title = cleaned_data.get("title")
         project = cleaned_data.get("project")
@@ -57,6 +63,8 @@ class TaskForm(forms.ModelForm):
 
 
 class ProjectForm(forms.ModelForm):
+    """Project form."""
+
     class Meta:
         model = Project
         fields = ["name"]

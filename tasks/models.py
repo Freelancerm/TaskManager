@@ -3,6 +3,8 @@ from django.db import models
 
 
 class Project(models.Model):
+    """User-owned project for grouping tasks."""
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
     name = models.CharField(max_length=120)
 
@@ -11,6 +13,8 @@ class Project(models.Model):
 
 
 class Task(models.Model):
+    """User-owned task with optional project, priority, and due date."""
+
     PRIORITY_HIGH = 1
     PRIORITY_MEDIUM = 2
     PRIORITY_LOW = 3

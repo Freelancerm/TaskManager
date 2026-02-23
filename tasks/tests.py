@@ -55,7 +55,9 @@ class TaskManagerHTMXTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "New Project")
-        self.assertTrue(Project.objects.filter(user=self.user, name="New Project").exists())
+        self.assertTrue(
+            Project.objects.filter(user=self.user, name="New Project").exists()
+        )
 
     def test_update_project_htmx(self):
         response = self.client.post(
