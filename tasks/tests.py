@@ -74,6 +74,7 @@ class TaskManagerHTMXTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Project.objects.filter(id=self.project.id).exists())
+        self.assertEqual(response.headers.get("HX-Trigger"), "project-list-changed")
 
     def test_create_task_htmx_unassigned(self):
         response = self.client.post(
@@ -90,6 +91,7 @@ class TaskManagerHTMXTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Task 1")
         self.assertTrue(Task.objects.filter(user=self.user, title="Task 1").exists())
+        self.assertEqual(response.headers.get("HX-Trigger"), "task-list-updated")
 
     def test_update_task_htmx(self):
         task = Task.objects.create(user=self.user, title="Old", project=None)
@@ -108,6 +110,7 @@ class TaskManagerHTMXTests(TestCase):
         task.refresh_from_db()
         self.assertEqual(task.title, "New")
         self.assertEqual(task.priority, Task.PRIORITY_HIGH)
+        self.assertIn("task-list-updated", response.headers.get("HX-Trigger", ""))
 
     def test_toggle_task_htmx(self):
         task = Task.objects.create(user=self.user, title="Toggle", project=None)
@@ -118,6 +121,7 @@ class TaskManagerHTMXTests(TestCase):
         self.assertEqual(response.status_code, 200)
         task.refresh_from_db()
         self.assertTrue(task.is_done)
+        self.assertEqual(response.headers.get("HX-Trigger"), "task-list-updated")
 
     def test_delete_task_htmx(self):
         task = Task.objects.create(user=self.user, title="Delete", project=None)
@@ -127,6 +131,7 @@ class TaskManagerHTMXTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Task.objects.filter(id=task.id).exists())
+        self.assertEqual(response.headers.get("HX-Trigger"), "task-list-updated")
 
 
 class TaskManagerValidationTests(TestCase):
@@ -177,6 +182,43 @@ class TaskManagerValidationTests(TestCase):
             user=self.user,
         )
         self.assertTrue(form.is_valid())
+
+
+class TaskManagerProjectTaskFormTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="u1", password="pass")
+        self.project = Project.objects.create(user=self.user, name="P1")
+        self.client.force_login(self.user)
+
+    def test_project_inline_create_success(self):
+        response = self.client.post(
+            reverse("project-task-create", args=[self.project.id]),
+            {
+                "title": "Inline task",
+                "description": "",
+                "priority": Task.PRIORITY_MEDIUM,
+                "due_date": date.today().isoformat(),
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Inline task")
+        task = Task.objects.get(user=self.user, title="Inline task")
+        self.assertEqual(task.project_id, self.project.id)
+
+    def test_project_inline_create_validation_error(self):
+        response = self.client.post(
+            reverse("project-task-create", args=[self.project.id]),
+            {
+                "title": "",
+                "description": "",
+                "priority": Task.PRIORITY_MEDIUM,
+                "due_date": date.today().isoformat(),
+            },
+            HTTP_HX_REQUEST="true",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Please provide a task title.")
 
 
 class TaskManagerOrderingTests(TestCase):

@@ -159,10 +159,6 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("home")
     http_method_names = ["post", "delete"]
 
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
-
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
 
@@ -258,10 +254,6 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
     model = Project
     success_url = reverse_lazy("home")
     http_method_names = ["post", "delete"]
-
-    def __init__(self, **kwargs):
-        super().__init__(kwargs)
-        self.object = None
 
     def get_queryset(self):
         return Project.objects.filter(user=self.request.user)
