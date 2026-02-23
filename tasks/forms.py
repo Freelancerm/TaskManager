@@ -15,12 +15,13 @@ class TaskForm(forms.ModelForm):
                 attrs={
                     "class": "form-control",
                     "placeholder": "Start typing here to create a task...",
+                    "required": True,
                 }
             ),
             "description": forms.Textarea(
                 attrs={"class": "form-control", "rows": 3, "placeholder": "Description"}
             ),
-            "priority": forms.Select(attrs={"class": "form-select"}),
+            "priority": forms.Select(attrs={"class": "form-select", "required": True}),
             "due_date": forms.DateInput(
                 attrs={"class": "form-control", "type": "date"}
             ),
@@ -70,6 +71,10 @@ class ProjectForm(forms.ModelForm):
         fields = ["name"]
         widgets = {
             "name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Project name"}
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Project name",
+                    "required": True,
+                }
             ),
         }

@@ -1,5 +1,6 @@
 <form
-    class="mb-3"
+    class="mb-3 needs-validation"
+    novalidate
     method="post"
     hx-post="{{ form_action }}"
     {% if object %}
@@ -19,6 +20,7 @@
     {% for error in form.name.errors %}
     <div class="text-danger small mt-1">{{ error }}</div>
     {% endfor %}
+    <div class="invalid-feedback">Please provide a project name.</div>
     {% if object %}
     <div class="mt-2">
         <button

@@ -1,5 +1,6 @@
 <form
-    class="mb-3"
+    class="mb-3 needs-validation"
+    novalidate
     method="post"
     hx-post="{{ form_action }}"
     {% if object %}
@@ -19,6 +20,9 @@
     {% for error in form.title.errors %}
     <div class="text-danger small mb-2">{{ error }}</div>
     {% endfor %}
+    <div class="invalid-feedback">
+        Please provide a task title.
+    </div>
     <div class="row g-2">
         <div class="col-12">
             {{ form.description }}
@@ -31,12 +35,14 @@
             {% for error in form.priority.errors %}
             <div class="text-danger small">{{ error }}</div>
             {% endfor %}
+            <div class="invalid-feedback">Choose a priority.</div>
         </div>
         <div class="col-6">
             {{ form.due_date }}
             {% for error in form.due_date.errors %}
             <div class="text-danger small">{{ error }}</div>
             {% endfor %}
+            <div class="invalid-feedback">Choose a valid due date.</div>
         </div>
         <div class="col-12">
             {{ form.project }}
