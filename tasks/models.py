@@ -24,12 +24,8 @@ class Task(models.Model):
         (PRIORITY_LOW, "Low"),
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
-    priority = models.PositiveSmallIntegerField(
-        choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM
-    )
-    project = models.ForeignKey(
-        Project, on_delete=models.SET_NULL, null=True, blank=True
-    )
+    priority = models.PositiveSmallIntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM)
+    project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=160)
     description = models.TextField(blank=True)
 
@@ -41,6 +37,11 @@ class Task(models.Model):
 
     class Meta:
         ordering = ["is_done", "priority", "due_date", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "project", "title"], name="uniq_task_title_per_project"
+            )
+        ]
 
     def __str__(self):
         return self.title
