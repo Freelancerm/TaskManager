@@ -1,0 +1,24 @@
+<li class="list-group-item" id="project-{{ project.id }}">
+    <div class="d-flex align-items-center justify-content-between">
+        <strong>{{ project.name }}</strong>
+        <div class="d-flex gap-2">
+            <button
+                class="btn btn-outline-secondary btn-sm"
+                hx-get="{% url 'project-update' project.id %}"
+                hx-target="#project-form-container"
+                hx-swap="innerHTML"
+            >
+                Edit
+            </button>
+            <button
+                class="btn btn-outline-danger btn-sm"
+                hx-delete="{% url 'project-delete' project.id %}"
+                hx-target="closest li"
+                hx-swap="outerHTML"
+                hx-confirm="Delete this project?"
+            >
+                Delete
+            </button>
+        </div>
+    </div>
+</li>

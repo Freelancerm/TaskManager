@@ -9,7 +9,7 @@
     <ul class="list-group list-group-flush">
 
         {% for task in tasks %}
-            {% include "partials/task_item.html" with task=task %}
+        {% include "partials/task_item.html" with task=task %}
         {% endfor %}
 
     </ul>
@@ -21,18 +21,17 @@
         Projects
     </div>
 
-    <ul class="list-group list-group-flush">
+    <div
+        class="card-body py-2"
+        id="project-form-container"
+        hx-get="{% url 'project-create' %}"
+        hx-trigger="load"
+    ></div>
 
+    <ul class="list-group list-group-flush" id="project-list">
         {% for project in projects %}
-        <li class="list-group-item">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">{{ project.name }}</h5>
-                </div>
-            </div>
-        </li>
+        {% include "partials/project_item.html" with project=project %}
         {% endfor %}
-
     </ul>
 </div>
 
