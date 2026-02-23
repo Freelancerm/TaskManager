@@ -1,9 +1,55 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Hey </h1>
-    {% for task in tasks %}
-        <p>{{ task.title }}</p>
-        <p>{{ task.description }}</p>
-    {% endfor %}
+<div class="card" style="width: 18rem;">
+    <div class="card-header">
+        Tasks
+    </div>
+
+    <ul class="list-group list-group-flush">
+
+        {% for task in tasks %}
+        <li class="list-group-item">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ task.title }}</h5>
+                    <p class="card-text">{{ task.description }}</p>
+
+                    {% if task.due_date %}
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Due Date: {{ task.due_date }}
+                        </small>
+                    </p>
+                    {% endif %}
+
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+
+    </ul>
+</div>
+
+
+<div class="card mt-4" style="width: 18rem;">
+    <div class="card-header">
+        Projects
+    </div>
+
+    <ul class="list-group list-group-flush">
+
+        {% for project in projects %}
+        <li class="list-group-item">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ project.name }}</h5>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+
+    </ul>
+</div>
+
 {% endblock content %}
