@@ -230,9 +230,12 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
 
     def form_invalid(self, form):
         if self.request.htmx:
-            return render(
+            response = render(
                 self.request, self.template_name, self.get_context_data(form=form)
             )
+            response.headers["HX-Retarget"] = "#project-form-container"
+            response.headers["HX-Reswap"] = "innerHTML"
+            return response
         return super().form_invalid(form)
 
 
@@ -265,9 +268,12 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
 
     def form_invalid(self, form):
         if self.request.htmx:
-            return render(
+            response = render(
                 self.request, self.template_name, self.get_context_data(form=form)
             )
+            response.headers["HX-Retarget"] = "#project-form-container"
+            response.headers["HX-Reswap"] = "innerHTML"
+            return response
         return super().form_invalid(form)
 
 
