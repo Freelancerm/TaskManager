@@ -1,5 +1,6 @@
 import json
 
+from django import forms
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import CreateView, UpdateView, DeleteView
@@ -270,8 +271,44 @@ class ProjectTasksView(LoginRequiredMixin, View):
             Task.objects.filter(user=request.user, project=project)
             .order_by("is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at")
         )
+        form = TaskForm(user=request.user, initial={"project": project})
+        form.fields["project"].widget = forms.HiddenInput()
         return render(
             request,
             "partials/project_tasks.html",
-            {"project": project, "tasks": tasks},
+            {"project": project, "tasks": tasks, "form": form},
+        )
+
+
+class ProjectTaskCreateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk, user=request.user)
+        form = TaskForm(request.POST, user=request.user)
+        form.fields["project"].widget = forms.HiddenInput()
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.project = project
+            task.save()
+            tasks = (
+                Task.objects.filter(user=request.user, project=project)
+                .order_by(
+                    "is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at"
+                )
+            )
+            blank_form = TaskForm(user=request.user, initial={"project": project})
+            blank_form.fields["project"].widget = forms.HiddenInput()
+            return render(
+                request,
+                "partials/project_tasks.html",
+                {"project": project, "tasks": tasks, "form": blank_form},
+            )
+        tasks = (
+            Task.objects.filter(user=request.user, project=project)
+            .order_by("is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at")
+        )
+        return render(
+            request,
+            "partials/project_tasks.html",
+            {"project": project, "tasks": tasks, "form": form},
         )

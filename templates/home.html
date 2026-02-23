@@ -1,37 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="task-column mx-auto">
-    <div class="panel mb-4">
-        <div class="panel-header">Tasks</div>
-        <div
-            class="panel-body"
-            id="task-form-container"
-            hx-get="{% url 'task-create' %}"
-            hx-trigger="load, project-list-changed from:body"
-        ></div>
-        <div
-            id="task-list"
-            hx-get="{% url 'task-list' %}"
-            hx-trigger="load, task-list-updated from:body"
-            hx-swap="innerHTML"
-        >
-            {% include "partials/task_list.html" with tasks=tasks %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-6 col-xl-5 mb-4">
+        <div class="panel h-100">
+            <div class="panel-header">Tasks</div>
+            <div
+                class="panel-body"
+                id="task-form-container"
+                hx-get="{% url 'task-create' %}"
+                hx-trigger="load, project-list-changed from:body"
+            ></div>
+            <div
+                id="task-list"
+                hx-get="{% url 'task-list' %}"
+                hx-trigger="load, task-list-updated from:body"
+                hx-swap="innerHTML"
+            >
+                {% include "partials/task_list.html" with tasks=tasks %}
+            </div>
         </div>
     </div>
-
-    <div class="panel">
-        <div class="panel-header">Projects</div>
-        <div
-            class="panel-body"
-            id="project-form-container"
-            hx-get="{% url 'project-create' %}"
-            hx-trigger="load"
-        ></div>
-        <div id="project-list">
-            {% for project in projects %}
-            {% include "partials/project_item.html" with project=project %}
-            {% endfor %}
+    <div class="col-12 col-lg-6 col-xl-5">
+        <div class="panel h-100">
+            <div class="panel-header">Projects</div>
+            <div
+                class="panel-body"
+                id="project-form-container"
+                hx-get="{% url 'project-create' %}"
+                hx-trigger="load"
+            ></div>
+            <div id="project-list">
+                {% for project in projects %}
+                {% include "partials/project_item.html" with project=project %}
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>

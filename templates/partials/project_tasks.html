@@ -1,4 +1,43 @@
 <div class="panel">
+    <div class="panel-body">
+        <form
+            method="post"
+            hx-post="{% url 'project-task-create' project.id %}"
+            hx-target="#project-{{ project.id }}-tasks"
+            hx-swap="innerHTML"
+        >
+            {% csrf_token %}
+            {{ form.project }}
+            {{ form.non_field_errors }}
+            <div class="input-group mb-2">
+                {{ form.title }}
+                <button type="submit" class="btn btn-success">Add Task</button>
+            </div>
+            {% for error in form.title.errors %}
+            <div class="text-danger small mb-2">{{ error }}</div>
+            {% endfor %}
+            <div class="row g-2">
+                <div class="col-12">
+                    {{ form.description }}
+                    {% for error in form.description.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-6">
+                    {{ form.priority }}
+                    {% for error in form.priority.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="col-6">
+                    {{ form.due_date }}
+                    {% for error in form.due_date.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </form>
+    </div>
     {% for task in tasks %}
     {% include "partials/task_item.html" with task=task %}
     {% empty %}
