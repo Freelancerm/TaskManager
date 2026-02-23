@@ -1,33 +1,31 @@
-<li class="list-group-item" id="project-{{ project.id }}">
-    <div class="d-flex align-items-center justify-content-between">
-        <strong>{{ project.name }}</strong>
-        <div class="d-flex gap-2">
-            <button
-                class="btn btn-outline-primary btn-sm"
-                hx-get="{% url 'project-tasks' project.id %}"
-                hx-target="#project-{{ project.id }}-tasks"
-                hx-swap="innerHTML"
-            >
-                Tasks
-            </button>
-            <button
-                class="btn btn-outline-secondary btn-sm"
-                hx-get="{% url 'project-update' project.id %}"
-                hx-target="#project-form-container"
-                hx-swap="innerHTML"
-            >
-                Edit
-            </button>
-            <button
-                class="btn btn-outline-danger btn-sm"
-                hx-delete="{% url 'project-delete' project.id %}"
-                hx-target="closest li"
-                hx-swap="outerHTML"
-                hx-confirm="Delete this project?"
-            >
-                Delete
-            </button>
-        </div>
+<div class="task-row" id="project-{{ project.id }}">
+    <div class="flex-grow-1 fw-semibold">{{ project.name }}</div>
+    <div class="d-flex gap-1">
+        <button
+            class="btn btn-outline-primary btn-sm"
+            hx-get="{% url 'project-tasks' project.id %}"
+            hx-target="#project-{{ project.id }}-tasks"
+            hx-swap="innerHTML"
+        >
+            Tasks
+        </button>
+        <button
+            class="btn btn-outline-secondary btn-sm"
+            hx-get="{% url 'project-update' project.id %}"
+            hx-target="#project-form-container"
+            hx-swap="innerHTML"
+        >
+            Edit
+        </button>
+        <button
+            class="btn btn-outline-danger btn-sm"
+            hx-delete="{% url 'project-delete' project.id %}"
+            hx-target="#project-{{ project.id }}"
+            hx-swap="outerHTML"
+            hx-confirm="Delete this project?"
+        >
+            Delete
+        </button>
     </div>
-    <div class="mt-2" id="project-{{ project.id }}-tasks"></div>
-</li>
+</div>
+<div class="ms-4 mb-2" id="project-{{ project.id }}-tasks"></div>

@@ -11,6 +11,81 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <title>Document</title>
+    <style>
+        :root {
+            --panel-border: #cfd6e0;
+            --panel-shadow: 0 6px 20px rgba(20, 27, 46, 0.12);
+            --panel-header: linear-gradient(180deg, #5e87c6 0%, #446fb5 100%);
+            --panel-header-text: #ffffff;
+            --panel-bg: #ffffff;
+            --panel-muted: #6d778a;
+            --row-hover: #f4f7fb;
+        }
+
+        body {
+            font-family: "Trebuchet MS", "Tahoma", sans-serif;
+            background: linear-gradient(180deg, #d9d3b8 0%, #d5b25a 60%, #c28c12 100%);
+            min-height: 100vh;
+        }
+
+        .app-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+        }
+
+        .task-column {
+            max-width: 380px;
+        }
+
+        .panel {
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            background: var(--panel-bg);
+            box-shadow: var(--panel-shadow);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: var(--panel-header);
+            color: var(--panel-header-text);
+            padding: 0.5rem 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .panel-body {
+            padding: 0.75rem;
+        }
+
+        .task-row {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid #e7ebf2;
+            align-items: center;
+        }
+
+        .task-row:last-child {
+            border-bottom: none;
+        }
+
+        .task-row:hover {
+            background: var(--row-hover);
+        }
+
+        .task-title {
+            font-weight: 600;
+        }
+
+        .task-meta {
+            color: var(--panel-muted);
+            font-size: 0.85rem;
+        }
+
+        .task-actions .btn {
+            padding: 0.15rem 0.5rem;
+        }
+    </style>
 </head>
 <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
 <nav class="navbar navbar-expand-lg border-bottom app-nav">

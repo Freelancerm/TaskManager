@@ -8,7 +8,10 @@ class TaskForm(forms.ModelForm):
         fields = ["title", "description", "priority", "due_date", "project"]
         widgets = {
             "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Task title"}
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Start typing here to create a task...",
+                }
             ),
             "description": forms.Textarea(
                 attrs={"class": "form-control", "rows": 3, "placeholder": "Description"}

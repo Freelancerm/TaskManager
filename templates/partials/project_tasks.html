@@ -1,7 +1,7 @@
-<ul class="list-group list-group-flush">
+<div class="panel">
     {% for task in tasks %}
     {% include "partials/task_item.html" with task=task %}
     {% empty %}
-    <li class="list-group-item text-muted">No tasks yet.</li>
+    <div class="task-row text-muted">No tasks yet.</div>
     {% endfor %}
-</ul>
+</div>

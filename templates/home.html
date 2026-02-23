@@ -1,44 +1,35 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="card" style="width: 18rem;">
-    <div class="card-header">
-        Tasks
+<div class="task-column mx-auto">
+    <div class="panel mb-4">
+        <div class="panel-header">Tasks</div>
+        <div
+            class="panel-body"
+            id="task-form-container"
+            hx-get="{% url 'task-create' %}"
+            hx-trigger="load, project-list-changed from:body"
+        ></div>
+        <div id="task-list">
+            {% for task in tasks %}
+            {% include "partials/task_item.html" with task=task %}
+            {% endfor %}
+        </div>
     </div>
 
-    <div
-        class="card-body py-2"
-        id="task-form-container"
-        hx-get="{% url 'task-create' %}"
-        hx-trigger="load, project-list-changed from:body"
-    ></div>
-
-    <ul class="list-group list-group-flush" id="task-list">
-        {% for task in tasks %}
-        {% include "partials/task_item.html" with task=task %}
-        {% endfor %}
-
-    </ul>
-</div>
-
-
-<div class="card mt-4" style="width: 18rem;">
-    <div class="card-header">
-        Projects
+    <div class="panel">
+        <div class="panel-header">Projects</div>
+        <div
+            class="panel-body"
+            id="project-form-container"
+            hx-get="{% url 'project-create' %}"
+            hx-trigger="load"
+        ></div>
+        <div id="project-list">
+            {% for project in projects %}
+            {% include "partials/project_item.html" with project=project %}
+            {% endfor %}
+        </div>
     </div>
-
-    <div
-        class="card-body py-2"
-        id="project-form-container"
-        hx-get="{% url 'project-create' %}"
-        hx-trigger="load"
-    ></div>
-
-    <ul class="list-group list-group-flush" id="project-list">
-        {% for project in projects %}
-        {% include "partials/project_item.html" with project=project %}
-        {% endfor %}
-    </ul>
 </div>
-
 {% endblock content %}
