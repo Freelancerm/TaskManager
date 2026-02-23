@@ -1,7 +1,7 @@
 from django import forms
 from django.utils import timezone
 
-from .models import Task, Project
+from .models import Project, Task
 
 
 class TaskForm(forms.ModelForm):
@@ -22,9 +22,7 @@ class TaskForm(forms.ModelForm):
                 attrs={"class": "form-control", "rows": 3, "placeholder": "Description"}
             ),
             "priority": forms.Select(attrs={"class": "form-select", "required": True}),
-            "due_date": forms.DateInput(
-                attrs={"class": "form-control", "type": "date"}
-            ),
+            "due_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
             "project": forms.Select(attrs={"class": "form-select"}),
         }
 
@@ -57,9 +55,7 @@ class TaskForm(forms.ModelForm):
             .exists()
         )
         if exists:
-            self.add_error(
-                "title", "Task with this title already exists in this project."
-            )
+            self.add_error("title", "Task with this title already exists in this project.")
         return cleaned_data
 
 

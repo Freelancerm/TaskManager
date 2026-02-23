@@ -3,16 +3,16 @@
 import json
 
 from django import forms
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views import View
-from django.views.generic import CreateView, UpdateView, DeleteView
-from django.urls import reverse, reverse_lazy
-from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse, reverse_lazy
+from django.views import View
+from django.views.generic import CreateView, DeleteView, UpdateView
 
-from .models import Project, Task
 from .forms import ProjectForm, TaskForm
+from .models import Project, Task
 
 
 class HomeView(LoginRequiredMixin, View):
@@ -34,11 +34,7 @@ class TaskToggleDoneView(LoginRequiredMixin, View):
         task.is_done = not task.is_done
         task.save(update_fields=["is_done"])
         response = render(request, "partials/task_item.html", {"task": task})
-        trigger = (
-            f"project-tasks-{task.project_id}"
-            if task.project_id
-            else "task-list-updated"
-        )
+        trigger = f"project-tasks-{task.project_id}" if task.project_id else "task-list-updated"
         response.headers["HX-Trigger"] = trigger
         return response
 
@@ -77,11 +73,7 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
         task.user = self.request.user
         task.save()
         if self.request.htmx:
-            trigger = (
-                f"project-tasks-{task.project_id}"
-                if task.project_id
-                else "task-list-updated"
-            )
+            trigger = f"project-tasks-{task.project_id}" if task.project_id else "task-list-updated"
             if task.project_id:
                 blank_form = TaskForm(user=self.request.user)
                 context = {
@@ -94,18 +86,14 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
                 response.headers["HX-Retarget"] = "#task-form-container"
                 response.headers["HX-Reswap"] = "innerHTML"
             else:
-                response = render(
-                    self.request, "partials/task_item.html", {"task": task}
-                )
+                response = render(self.request, "partials/task_item.html", {"task": task})
             response.headers["HX-Trigger"] = trigger
             return response
         return redirect("home")
 
     def form_invalid(self, form):
         if self.request.htmx:
-            response = render(
-                self.request, self.template_name, self.get_context_data(form=form)
-            )
+            response = render(self.request, self.template_name, self.get_context_data(form=form))
             response.headers["HX-Retarget"] = "#task-form-container"
             response.headers["HX-Reswap"] = "innerHTML"
             return response
@@ -151,17 +139,13 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
             if len(triggers) == 1:
                 response.headers["HX-Trigger"] = triggers[0]
             elif triggers:
-                response.headers["HX-Trigger"] = json.dumps(
-                    {name: "" for name in triggers}
-                )
+                response.headers["HX-Trigger"] = json.dumps({name: "" for name in triggers})
             return response
         return redirect("home")
 
     def form_invalid(self, form):
         if self.request.htmx:
-            response = render(
-                self.request, self.template_name, self.get_context_data(form=form)
-            )
+            response = render(self.request, self.template_name, self.get_context_data(form=form))
             response.headers["HX-Retarget"] = "#task-form-container"
             response.headers["HX-Reswap"] = "innerHTML"
             return response
@@ -187,8 +171,7 @@ class TaskDeleteView(LoginRequiredMixin, DeleteView):
         project_id = self.object.project_id
         self.object.delete()
         is_htmx = (
-            bool(getattr(request, "htmx", False))
-            or request.headers.get("HX-Request") == "true"
+            bool(getattr(request, "htmx", False)) or request.headers.get("HX-Request") == "true"
         )
         if is_htmx:
             response = HttpResponse("")
@@ -221,18 +204,14 @@ class ProjectCreateView(LoginRequiredMixin, CreateView):
         project.user = self.request.user
         project.save()
         if self.request.htmx:
-            response = render(
-                self.request, "partials/project_item.html", {"project": project}
-            )
+            response = render(self.request, "partials/project_item.html", {"project": project})
             response.headers["HX-Trigger"] = "project-list-changed"
             return response
         return redirect("home")
 
     def form_invalid(self, form):
         if self.request.htmx:
-            response = render(
-                self.request, self.template_name, self.get_context_data(form=form)
-            )
+            response = render(self.request, self.template_name, self.get_context_data(form=form))
             response.headers["HX-Retarget"] = "#project-form-container"
             response.headers["HX-Reswap"] = "innerHTML"
             return response
@@ -259,18 +238,14 @@ class ProjectUpdateView(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         project = form.save()
         if self.request.htmx:
-            response = render(
-                self.request, "partials/project_item.html", {"project": project}
-            )
+            response = render(self.request, "partials/project_item.html", {"project": project})
             response.headers["HX-Trigger"] = "project-list-changed"
             return response
         return redirect("home")
 
     def form_invalid(self, form):
         if self.request.htmx:
-            response = render(
-                self.request, self.template_name, self.get_context_data(form=form)
-            )
+            response = render(self.request, self.template_name, self.get_context_data(form=form))
             response.headers["HX-Retarget"] = "#project-form-container"
             response.headers["HX-Reswap"] = "innerHTML"
             return response
@@ -295,8 +270,7 @@ class ProjectDeleteView(LoginRequiredMixin, DeleteView):
         self.object = self.get_object()
         self.object.delete()
         is_htmx = (
-            bool(getattr(request, "htmx", False))
-            or request.headers.get("HX-Request") == "true"
+            bool(getattr(request, "htmx", False)) or request.headers.get("HX-Request") == "true"
         )
         if is_htmx:
             response = HttpResponse("")

@@ -1,12 +1,12 @@
 from datetime import date
 
-from django.utils import timezone
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import Project, Task
 from .forms import TaskForm
+from .models import Project, Task
 
 
 class TaskManagerAccessTests(TestCase):
@@ -29,9 +29,7 @@ class TaskManagerAccessTests(TestCase):
 
     def test_project_update_denied_for_other_user(self):
         self.client.force_login(self.user)
-        response = self.client.get(
-            reverse("project-update", args=[self.other_project.id])
-        )
+        response = self.client.get(reverse("project-update", args=[self.other_project.id]))
         self.assertEqual(response.status_code, 404)
 
     def test_task_update_denied_for_other_user(self):
@@ -57,9 +55,7 @@ class TaskManagerHTMXTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "New Project")
-        self.assertTrue(
-            Project.objects.filter(user=self.user, name="New Project").exists()
-        )
+        self.assertTrue(Project.objects.filter(user=self.user, name="New Project").exists())
 
     def test_update_project_htmx(self):
         response = self.client.post(

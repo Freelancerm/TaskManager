@@ -3,3 +3,5 @@ Django==5.2
 sqlparse==0.5.5
 django-htmx==1.27.0
 django-allauth==0.63.6
+ruff==0.6.9
+pre-commit==3.8.0
