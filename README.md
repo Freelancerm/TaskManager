@@ -47,6 +47,7 @@ DJANGO_SUPERUSER_PASSWORD=admin123
 ```
 
 The entrypoint runs migrations and creates a superuser using these values.
+It also seeds demo data (see "Demo data" below).
 
 ### 2) Build and run
 ```bash
@@ -70,6 +71,7 @@ python manage.py runserver
 
 ## How to Use
 1) Sign up or log in.
+   - Demo user is preloaded: `user` / `user`.
 2) Create a project in the **Projects** panel.
 3) Add tasks:
    - Unassigned: use the **Tasks** panel.
@@ -81,6 +83,11 @@ python manage.py runserver
 - Tasks are ordered by: done status, priority, nearest due date.
 - Past due dates are not allowed.
 - Task titles are unique per project (for a given user).
+
+## Demo data
+On container startup, the app runs `python manage.py seed_demo` to create a demo
+user (`user` / `user`) with sample projects and tasks. The command is idempotent
+and will skip if the user already exists.
 
 ## Tests
 Run the test suite:
