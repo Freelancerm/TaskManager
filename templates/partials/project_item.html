@@ -3,9 +3,11 @@
     <div class="d-flex gap-1">
         <button
             class="btn btn-outline-primary btn-sm"
-            hx-get="{% url 'project-tasks' project.id %}"
-            hx-target="#project-{{ project.id }}-tasks"
-            hx-swap="innerHTML"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#project-{{ project.id }}-collapse"
+            aria-expanded="false"
+            aria-controls="project-{{ project.id }}-collapse"
         >
             Tasks
         </button>
@@ -29,9 +31,12 @@
     </div>
 </div>
 <div
-    class="ms-4 mb-2"
-    id="project-{{ project.id }}-tasks"
+    class="collapse ms-4 mb-2"
+    id="project-{{ project.id }}-collapse"
     hx-get="{% url 'project-tasks' project.id %}"
-    hx-trigger="project-tasks-{{ project.id }} from:body"
+    hx-target="#project-{{ project.id }}-tasks"
+    hx-trigger="shown.bs.collapse, project-tasks-{{ project.id }} from:body"
     hx-swap="innerHTML"
-></div>
+>
+    <div id="project-{{ project.id }}-tasks"></div>
+</div>
