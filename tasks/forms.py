@@ -1,4 +1,6 @@
 from django import forms
+from django.utils import timezone
+
 from .models import Task, Project
 
 
@@ -25,6 +27,33 @@ class TaskForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user is not None:
             self.fields["project"].queryset = Project.objects.filter(user=user)
+            self.user = user
+        else:
+            self.user = None
+        self.fields["due_date"].widget.attrs["min"] = timezone.localdate().isoformat()
+
+    def clean_due_date(self):
+        due_date = self.cleaned_data.get("due_date")
+        if due_date and due_date < timezone.localdate():
+            raise forms.ValidationError("Due date cannot be in the past.")
+        return due_date
+
+    def clean(self):
+        cleaned_data = super().clean()
+        title = cleaned_data.get("title")
+        project = cleaned_data.get("project")
+        if not title or self.user is None:
+            return cleaned_data
+        exists = (
+            Task.objects.filter(user=self.user, project=project, title=title)
+            .exclude(pk=self.instance.pk)
+            .exists()
+        )
+        if exists:
+            self.add_error(
+                "title", "Task with this title already exists in this project."
+            )
+        return cleaned_data
 
 
 class ProjectForm(forms.ModelForm):
