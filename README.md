@@ -38,12 +38,8 @@ Simple one-page task manager with projects, HTMX interactions, and user authenti
 ## Run with Docker Compose
 
 ### 1) Create `.env`
-Create a `.env` file in the project root (see example.env in project):
-
 ```bash
-DJANGO_SUPERUSER_USERNAME=admin
-DJANGO_SUPERUSER_EMAIL=admin@example.com
-DJANGO_SUPERUSER_PASSWORD=admin123
+cp .env.example .env
 ```
 
 The entrypoint runs migrations and creates a superuser using these values.
@@ -61,6 +57,7 @@ http://127.0.0.1:8000/
 
 ## Local Run (without Docker)
 ```bash
+cp .env.example .env
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -83,6 +80,7 @@ python manage.py runserver
 - Tasks are ordered by: done status, priority, nearest due date.
 - Past due dates are not allowed.
 - Task titles are unique per project (for a given user).
+- Optimization: tasks use `select_related("project")` where relevant to avoid N+1.
 
 ## Demo data
 On container startup, the app runs `python manage.py seed_demo` to create a demo

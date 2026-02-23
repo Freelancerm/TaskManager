@@ -1,15 +1,35 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import F
 
 
 class Project(models.Model):
     """User-owned project for grouping tasks."""
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="projects")
     name = models.CharField(max_length=120)
 
     def __str__(self):
         return self.name
+
+
+class TaskQuerySet(models.QuerySet):
+    def for_user(self, user):
+        return self.filter(user=user)
+
+    def unassigned(self, user):
+        return self.for_user(user).filter(project__isnull=True)
+
+    def in_project(self, project, user):
+        return self.for_user(user).filter(project=project)
+
+    def ordered(self):
+        return self.order_by(
+            "is_done",
+            "priority",
+            F("due_date").asc(nulls_last=True),
+            "-created_at",
+        )
 
 
 class Task(models.Model):
@@ -23,7 +43,7 @@ class Task(models.Model):
         (PRIORITY_MEDIUM, "Medium"),
         (PRIORITY_LOW, "Low"),
     ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tasks")
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="tasks")
     priority = models.PositiveSmallIntegerField(choices=PRIORITY_CHOICES, default=PRIORITY_MEDIUM)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True)
     title = models.CharField(max_length=160)
@@ -34,6 +54,8 @@ class Task(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = TaskQuerySet.as_manager()
 
     class Meta:
         ordering = ["is_done", "priority", "due_date", "-created_at"]

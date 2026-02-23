@@ -4,7 +4,6 @@ import json
 
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -19,10 +18,9 @@ class HomeView(LoginRequiredMixin, View):
     """Render the main dashboard with unassigned tasks and projects."""
 
     def get(self, request):
-        projects = Project.objects.filter(user=request.user)
-        tasks = Task.objects.filter(user=request.user, project__isnull=True).order_by(
-            "is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at"
-        )
+        projects = Project.objects.filter(user=request.user).prefetch_related("task_set")
+        # Prefetch tasks to avoid N+1 if the project list is expanded server-side.
+        tasks = Task.objects.unassigned(request.user).ordered()
         return render(request, "home.html", {"projects": projects, "tasks": tasks})
 
 
@@ -43,9 +41,7 @@ class TaskListView(LoginRequiredMixin, View):
     """Return the unassigned task list partial for HTMX refresh."""
 
     def get(self, request):
-        tasks = Task.objects.filter(user=request.user, project__isnull=True).order_by(
-            "is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at"
-        )
+        tasks = Task.objects.unassigned(request.user).ordered()
         return render(request, "partials/task_list.html", {"tasks": tasks})
 
 
@@ -279,9 +275,8 @@ class ProjectTasksView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         project = get_object_or_404(Project, pk=pk, user=request.user)
-        tasks = Task.objects.filter(user=request.user, project=project).order_by(
-            "is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at"
-        )
+        tasks = Task.objects.in_project(project, request.user).select_related("project").ordered()
+        # select_related avoids extra queries when rendering task.project data.
         form = TaskForm(user=request.user, initial={"project": project})
         form.fields["project"].widget = forms.HiddenInput()
         return render(
@@ -303,8 +298,8 @@ class ProjectTaskCreateView(LoginRequiredMixin, View):
             task.user = request.user
             task.project = project
             task.save()
-            tasks = Task.objects.filter(user=request.user, project=project).order_by(
-                "is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at"
+            tasks = (
+                Task.objects.in_project(project, request.user).select_related("project").ordered()
             )
             blank_form = TaskForm(user=request.user, initial={"project": project})
             blank_form.fields["project"].widget = forms.HiddenInput()
@@ -313,9 +308,7 @@ class ProjectTaskCreateView(LoginRequiredMixin, View):
                 "partials/project_tasks.html",
                 {"project": project, "tasks": tasks, "form": blank_form},
             )
-        tasks = Task.objects.filter(user=request.user, project=project).order_by(
-            "is_done", "priority", F("due_date").asc(nulls_last=True), "-created_at"
-        )
+        tasks = Task.objects.in_project(project, request.user).select_related("project").ordered()
         return render(
             request,
             "partials/project_tasks.html",

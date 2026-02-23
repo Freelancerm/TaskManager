@@ -50,7 +50,8 @@ class TaskForm(forms.ModelForm):
         if not title or self.user is None:
             return cleaned_data
         exists = (
-            Task.objects.filter(user=self.user, project=project, title=title)
+            Task.objects.for_user(self.user)
+            .filter(project=project, title=title)
             .exclude(pk=self.instance.pk)
             .exists()
         )
