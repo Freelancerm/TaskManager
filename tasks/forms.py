@@ -6,6 +6,17 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = ["title", "description", "priority", "due_date", "project"]
+        widgets = {
+            "title": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Task title"}
+            ),
+            "description": forms.Textarea(
+                attrs={"class": "form-control", "rows": 3, "placeholder": "Description"}
+            ),
+            "priority": forms.Select(attrs={"class": "form-select"}),
+            "due_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "project": forms.Select(attrs={"class": "form-select"}),
+        }
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)

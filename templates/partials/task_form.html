@@ -1,0 +1,68 @@
+<div class="card mb-3">
+    <div class="card-body">
+        <h6 class="card-title mb-3">{{ form_title }}</h6>
+        <form
+            method="post"
+            hx-post="{{ form_action }}"
+            {% if object %}
+            hx-target="#task-{{ object.id }}"
+            hx-swap="outerHTML"
+            {% else %}
+            hx-target="#task-list"
+            hx-swap="afterbegin"
+            {% endif %}
+        >
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="mb-2">
+                <label class="form-label" for="{{ form.title.id_for_label }}">Title</label>
+                {{ form.title }}
+                {% for error in form.title.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {% for error in form.description.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="{{ form.priority.id_for_label }}">Priority</label>
+                {{ form.priority }}
+                {% for error in form.priority.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="{{ form.due_date.id_for_label }}">Due date</label>
+                {{ form.due_date }}
+                {% for error in form.due_date.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-2">
+                <label class="form-label" for="{{ form.project.id_for_label }}">Project</label>
+                {{ form.project }}
+                {% for error in form.project.errors %}
+                <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">{{ submit_label }}</button>
+                {% if object %}
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    hx-get="{% url 'task-create' %}"
+                    hx-target="#task-form-container"
+                    hx-swap="innerHTML"
+                >
+                    Cancel
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>

@@ -12,9 +12,30 @@
         <div class="flex-grow-1">
             <div class="card mb-2">
                 <div class="card-body py-2">
-                    <h5 class="card-title mb-1 {% if task.is_done %}text-decoration-line-through text-muted{% endif %}">
-                        {{ task.title }}
-                    </h5>
+                    <div class="d-flex align-items-start justify-content-between">
+                        <h5 class="card-title mb-1 {% if task.is_done %}text-decoration-line-through text-muted{% endif %}">
+                            {{ task.title }}
+                        </h5>
+                        <div class="d-flex gap-2 ms-2">
+                            <button
+                                class="btn btn-outline-secondary btn-sm"
+                                hx-get="{% url 'task-update' task.id %}"
+                                hx-target="#task-form-container"
+                                hx-swap="innerHTML"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                class="btn btn-outline-danger btn-sm"
+                                hx-delete="{% url 'task-delete' task.id %}"
+                                hx-target="closest li"
+                                hx-swap="outerHTML"
+                                hx-confirm="Delete this task?"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
                     {% if task.description %}
                     <p class="card-text mb-1">{{ task.description }}</p>
                     {% endif %}
